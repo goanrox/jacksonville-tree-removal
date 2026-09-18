@@ -7,7 +7,7 @@
   var path = window.location.pathname;
   if (!pages.includes(path)) return;
   if (path === '/index.html') path = '/';
-  var internal = window.location.hostname !== 'jacksonville-tree-removal.vercel.app';
+  var internal = window.location.hostname !== 'onslowtreeremoval.com';
   try {
     if (new URLSearchParams(window.location.search).get('internal_test') === '1') {
       window.sessionStorage.setItem('jtr_internal_test', '1');

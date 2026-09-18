@@ -1,7 +1,7 @@
 // Minimal, opt-in GA4 collection. No form values or URL queries are collected here.
 (function () {
   'use strict';
-  var id = 'G-PHRPMVG7S3', host = 'jacksonville-tree-removal.vercel.app';
+  var id = 'G-PHRPMVG7S3', host = 'onslowtreeremoval.com';
   var internal = location.hostname !== host, active = false, loaded = false;
   var choice = '', key = 'jtr_analytics_choice';
   var diagnostic = new URLSearchParams(location.search).get('analytics_check') === '1';

@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 
-Sitemap: https://jacksonville-tree-removal.vercel.app/sitemap.xml
+Sitemap: https://onslowtreeremoval.com/sitemap.xml
