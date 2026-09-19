@@ -1,3 +1,6 @@
+// Vercel Web Analytics: cookieless pageview counting, no personal data.
+window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+(function () { var s = document.createElement('script'); s.defer = true; s.src = '/_vercel/insights/script.js'; document.head.appendChild(s); })();
 // Minimal, opt-in GA4 collection. No form values or URL queries are collected here.
 (function () {
   'use strict';
