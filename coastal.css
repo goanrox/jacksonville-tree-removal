@@ -7,3 +7,6 @@
 @media(max-width:720px){.hero-copy h1{font-size:46px}.nav-cta{min-height:44px}.request-shell .service-choice>span{flex-direction:column;align-items:flex-start;min-height:104px}.request-intro h2 br,.faq-layout h2 br{display:initial}.footer-grid>div>a:not(.footer-brand){min-height:44px;display:flex;align-items:center}.footer-bottom a{display:inline-flex;min-height:44px;align-items:center}.request-heading p{font-size:14px}.hero-copy .role-note{font-size:12px!important}}
 @media(max-width:380px){.j-wrap{padding-left:16px;padding-right:16px}.j-brand{font-size:18px;gap:6px}.brand-second{font-size:6px;letter-spacing:.6px}.header-row{gap:7px}.nav-cta{padding:8px;font-size:10px}.hero-copy h1{font-size:42px}.request-shell{padding:20px 14px}.step-indicator ol{font-size:10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+.brand-tagline{align-self:center;font:700 10px/1.5 Arial,sans-serif;letter-spacing:1.2px;color:#8a6d1f;white-space:nowrap}
+.brand-tagline a{color:inherit}
+@media(max-width:900px){.brand-tagline{display:none}}
