@@ -23,7 +23,7 @@
     if (!loaded) {
       tag('consent', 'default', {analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'});
       tag('js', new Date());
-      var config = {send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false, page_location: 'https://' + host + path, page_referrer: '', page_title: 'Jacksonville Tree Removal'};
+      var config = {send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false, page_location: 'https://' + host + path, page_referrer: '', page_title: 'Onslow Tree Removal'};
       if (diagnostic) { config.debug_mode = true; config.traffic_type = 'internal'; }
       tag('config', id, config);
       var script = document.createElement('script'); script.async = true;
