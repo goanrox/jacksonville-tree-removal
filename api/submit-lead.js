@@ -68,31 +68,62 @@ async function hostPhoto(buffer) {
   }
 }
 
-function postJson(url, obj) {
+function httpsJson(method, url, obj, extraHeaders) {
   return new Promise((resolve, reject) => {
-    const data = Buffer.from(JSON.stringify(obj));
+    const data = obj ? Buffer.from(JSON.stringify(obj)) : null;
     const u = new URL(url);
+    const headers = Object.assign(
+      { 'Accept': 'application/json', 'User-Agent': 'onslowtreeremoval-lead-form/1.0' },
+      extraHeaders || {});
+    if (data) {
+      headers['Content-Type'] = 'application/json';
+      headers['Content-Length'] = data.length;
+    }
     const req = https.request({
-      hostname: u.hostname, path: u.pathname, method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Content-Length': data.length,
-        'User-Agent': 'onslowtreeremoval-lead-form/1.0'
-      }
+      hostname: u.hostname, path: u.pathname + u.search, method,
+      headers
     }, (res) => {
       let raw = '';
       res.on('data', (c) => { raw += c; });
       res.on('end', () => {
-        try { resolve(JSON.parse(raw)); }
-        catch (e) { resolve({ success: false, raw: raw.slice(0, 200) }); }
+        try { resolve({ status: res.statusCode, json: JSON.parse(raw) }); }
+        catch (e) { resolve({ status: res.statusCode, json: null, raw: raw.slice(0, 200) }); }
       });
     });
     req.on('error', reject);
-    req.setTimeout(15000, () => req.destroy(new Error('timeout:web3forms')));
-    req.write(data);
+    req.setTimeout(15000, () => req.destroy(new Error('timeout:https')));
+    if (data) req.write(data);
     req.end();
   });
+}
+
+// Returns true when the domain can receive mail: it must publish MX records.
+// Native DNS first (fast); DNS-over-HTTPS fallbacks keep verification working
+// even where the platform resolver refuses MX queries.
+async function domainCanReceiveMail(domain) {
+  try {
+    const mx = await withTimeout(dns.resolveMx(domain), 4000, 'mx');
+    if (mx && mx.length) return true;
+  } catch (e) {
+    if (e && e.code === 'ENOTFOUND') return false; // the domain itself does not exist
+    // Any other resolver failure (EREFUSED, ETIMEDOUT, ESERVFAIL...) is not an
+    // answer about the domain — confirm over HTTPS instead.
+  }
+  const q = encodeURIComponent(domain);
+  const doh = [
+    `https://cloudflare-dns.com/dns-query?name=${q}&type=MX`,
+    `https://dns.google/resolve?name=${q}&type=MX`
+  ];
+  for (const url of doh) {
+    try {
+      const r = await withTimeout(
+        httpsJson('GET', url, null, { 'Accept': 'application/dns-json' }), 6000, 'doh');
+      const j = r && r.json;
+      if (j && Array.isArray(j.Answer) && j.Answer.length > 0) return true;
+      if (j && j.Status === 3) return false; // NXDOMAIN from an authoritative answer
+    } catch (e) { /* try the next provider */ }
+  }
+  return false;
 }
 
 module.exports = async (req, res) => {
@@ -135,15 +166,13 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // The domain must have mail servers, or the address cannot receive anything.
+  // The domain must be able to receive mail, or the address is fake.
   const domain = email.split('@').pop().toLowerCase();
-  try {
-    const mx = await withTimeout(dns.resolveMx(domain), 5000, 'mx');
-    if (!mx || !mx.length) throw new Error('no mx records');
-  } catch (e) {
+  if (!(await domainCanReceiveMail(domain))) {
     res.status(400).end(JSON.stringify({ success: false, error: 'email' }));
     return;
   }
+
 
   let photoUrl = '';
   try {
@@ -181,8 +210,8 @@ module.exports = async (req, res) => {
   };
 
   try {
-    const w = await withTimeout(postJson('https://api.web3forms.com/submit', payload), 15000, 'web3forms');
-    if (!w || w.success !== true) throw new Error('web3forms rejected the submission');
+    const w = await withTimeout(httpsJson('POST', 'https://api.web3forms.com/submit', payload), 15000, 'web3forms');
+    if (!w || !w.json || w.json.success !== true) throw new Error('web3forms rejected the submission');
   } catch (e) {
     res.status(502).end(JSON.stringify({ success: false }));
     return;
