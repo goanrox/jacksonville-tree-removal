@@ -51,21 +51,30 @@ function postMultipart(url, textFields, fileFieldName, fileBuffer, fileName) {
   });
 }
 
-// Free, no-key image hosts. Catbox first, 0x0.st as fallback.
+// Free, no-key image hosts. Catbox first, Litterbox (catbox temp storage) as fallback.
+// Never throws away the lead: returns { url } or throws with .attempts detail.
 async function hostPhoto(buffer) {
-  try {
-    const up = await withTimeout(
-      postMultipart('https://catbox.moe/user/api.php', { reqtype: 'fileupload' }, 'fileToUpload', buffer, 'tree-photo.jpg'),
-      20000, 'catbox');
-    if (up.status === 200 && /^https?:\/\//.test(up.body)) return up.body;
-    throw new Error('catbox rejected: ' + up.body.slice(0, 120));
-  } catch (e) {
-    const up = await withTimeout(
-      postMultipart('https://0x0.st', {}, 'file', buffer, 'tree-photo.jpg'),
-      20000, '0x0st');
-    if (up.status === 200 && /^https?:\/\//.test(up.body)) return up.body;
-    throw new Error('image hosts unavailable');
+  const attempts = [];
+  const hosts = [
+    { name: 'catbox',
+      fn: () => postMultipart('https://catbox.moe/user/api.php',
+        { reqtype: 'fileupload' }, 'fileToUpload', buffer, 'tree-photo.jpg') },
+    { name: 'litterbox',
+      fn: () => postMultipart('https://litterbox.catbox.moe/resources/internals/api.php',
+        { reqtype: 'fileupload', time: '72h' }, 'fileToUpload', buffer, 'tree-photo.jpg') },
+  ];
+  for (const h of hosts) {
+    try {
+      const up = await withTimeout(h.fn(), 20000, h.name);
+      if (up.status === 200 && /^https?:\/\//.test(up.body)) return { url: up.body, host: h.name };
+      attempts.push(h.name + ': rejected(' + up.status + ') ' + up.body.slice(0, 80));
+    } catch (e) {
+      attempts.push(h.name + ': ' + String((e && e.message) || e).slice(0, 80));
+    }
   }
+  const err = new Error('image hosts unavailable');
+  err.attempts = attempts;
+  throw err;
 }
 
 function httpsJson(method, url, obj, extraHeaders) {
@@ -174,25 +183,32 @@ module.exports = async (req, res) => {
   }
 
 
-  let photoUrl = '';
+  // Photo is required from the homeowner, but a failed upload must NEVER lose
+  // the lead. On failure we flag it loudly so it gets phone-verified instead.
+  let photoUrl = '', photoError = '';
   try {
     if (!d.photoBase64) throw new Error('photo required');
     const buf = Buffer.from(d.photoBase64, 'base64');
     if (!buf.length || buf.length > 5 * 1024 * 1024) throw new Error('bad photo size');
-    photoUrl = await hostPhoto(buf);
+    photoUrl = (await hostPhoto(buf)).url;
   } catch (e) {
-    res.status(502).end(JSON.stringify({ success: false, error: 'photo' }));
-    return;
+    photoError = 'PHOTO UPLOAD FAILED (' +
+      ((e && e.attempts && e.attempts.join(' | ')) || (e && e.message) || 'unknown') +
+      ') — ask the homeowner to text the tree photo to (910) 601-5667';
   }
 
   if (d.dry_run === true) {
-    res.status(200).end(JSON.stringify({ success: true, dry_run: true, photo_url: photoUrl }));
+    res.status(200).end(JSON.stringify({
+      success: true, dry_run: true, photo_url: photoUrl,
+      photo_error: photoError || undefined
+    }));
     return;
   }
 
   const payload = {
     access_key: String(d.access_key),
-    subject: d.subject || 'New Lead — Onslow Tree Removal',
+    subject: (d.subject || 'New Lead — Onslow Tree Removal') +
+      (photoError ? ' — ⚠️ PHOTO MISSING, VERIFY BY PHONE' : ''),
     from_name: d.from_name || 'Onslow Tree Removal website',
     name: d.name || '',
     phone: String(d.phone),
@@ -202,6 +218,7 @@ module.exports = async (req, res) => {
     urgency: String(d.urgency),
     service: String(d.service),
     photo_url: photoUrl,
+    photo_status: photoUrl ? 'uploaded: ' + photoUrl : photoError,
     lead_id: d.lead_id || '',
     source_url: d.source_url || '',
     referrer: d.referrer || '',
