@@ -47,6 +47,34 @@
   }
 
   document.querySelectorAll('form[data-lead-form]').forEach(function (form) {
+    // Photo picker: show the chosen file name + thumbnail, and tint the
+    // button sage like a picked town card.
+    (function () {
+      var picker = form.querySelector('[data-photo-picker]');
+      if (!picker) return;
+      var fileInput = picker.querySelector('input[type="file"]');
+      var fileText = picker.querySelector('[data-photo-text]');
+      var fileThumb = picker.querySelector('[data-photo-thumb]');
+      var thumbImg = fileThumb ? fileThumb.querySelector('img') : null;
+      var URL_ = window.URL || window.webkitURL;
+      var lastUrl = null;
+      fileInput.addEventListener('change', function () {
+        var f = fileInput.files && fileInput.files[0];
+        picker.classList.toggle('has-file', !!f);
+        if (fileText) fileText.textContent = f ? f.name : 'Choose a photo';
+        if (lastUrl && URL_) { try { URL_.revokeObjectURL(lastUrl); } catch (_) {} lastUrl = null; }
+        if (fileThumb) {
+          if (f && thumbImg && URL_) {
+            lastUrl = URL_.createObjectURL(f);
+            thumbImg.src = lastUrl;
+            fileThumb.hidden = false;
+          } else {
+            fileThumb.hidden = true;
+            if (thumbImg) thumbImg.removeAttribute('src');
+          }
+        }
+      });
+    })();
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (form.dataset.sending === 'true') return;
