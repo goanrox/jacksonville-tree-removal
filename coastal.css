@@ -49,4 +49,17 @@
 @media(max-width:720px){.photo-band{padding:0 22px}.photo-band figcaption{left:34px}.photo-band img{aspect-ratio:16/10}}
 /* Compact service cards: 3-across with square photos on small screens */
 @media(max-width:720px){.service-choices{gap:10px}.choice-card img{aspect-ratio:1/1}.choice-label{font-size:12px;line-height:1.3;padding:10px}.choice-check{width:26px;height:26px}}
+/* App-style compact service list on phones: high density, minimal scrolling */
+@media(max-width:720px){
+.step-indicator{margin:12px 0 16px}
+.request-shell legend{margin-bottom:10px}
+.service-choices{grid-template-columns:1fr;gap:8px}
+.service-choice .choice-card{display:flex;align-items:center;gap:12px;padding:7px}
+.service-choice .choice-card img{width:56px;min-width:56px;height:56px;aspect-ratio:auto;border-radius:10px}
+.service-choice .choice-label{flex:1;min-width:0;background:none;padding:0 4px;font-size:15px}
+.service-choice input:checked+.choice-card .choice-label{background:none}
+.service-choice .choice-check{position:static;flex-shrink:0;width:28px;height:28px}
+.service-choice input:checked+.choice-card{background:#edf3e7}
+.service-choice:hover .choice-card{transform:none}
+}
 @media(max-width:480px){.choice-label{font-size:11px;padding:8px}}
