@@ -17,7 +17,7 @@
       var btn = form.querySelector('button[type="submit"]');
       var originalHTML = btn.innerHTML;
       btn.disabled = true;
-      btn.textContent = 'Sending…';
+      btn.innerHTML = 'Sending your request<span class="send-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>';
 
       var error = form.querySelector('.form-error');
       if (!error) {

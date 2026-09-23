@@ -3,7 +3,11 @@
  document.querySelectorAll('[data-guided-form]').forEach(function(form){
   var steps=Array.from(form.querySelectorAll('[data-step]')), current=0;
   var next=form.querySelector('[data-next]'),back=form.querySelector('[data-back]'),send=form.querySelector('[type=submit]');
-  var indicator=form.querySelector('.step-indicator'), labels=['Your tree','Your location','Contact & send'];
+  var indicator=form.querySelector('.step-indicator');
+  var milestones=Array.from(indicator.querySelectorAll('.milestone'));
+  var reassure=['Step 1 of 3 · Pick what looks closest — you’re on your way.',
+                'Step 2 of 3 · Where’s the property? Almost there.',
+                'Step 3 of 3 · How can we reach you? Help is on the way.'];
   var error=form.querySelector('.form-error');
   var phone=form.elements.phone;
   function validatePhone(){var n=phone.value.replace(/\D/g,'');phone.setCustomValidity(n.length>=10&&n.length<=15?'':'Please enter a phone number with 10 to 15 digits.');}
@@ -24,10 +28,13 @@
    current=index;
    steps.forEach(function(step,i){step.hidden=i!==index;});
    next.hidden=index===2;back.hidden=index===0;send.hidden=index!==2;
-   indicator.querySelector('[data-step-status]').textContent='Step '+(index+1)+' of 3 · '+labels[index];
-   indicator.querySelector('[data-step-count]').textContent=(index+1)+' / 3';
-   indicator.querySelector('progress').value=index+1;
-   indicator.querySelectorAll('li').forEach(function(li,i){if(i===index)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');});
+   indicator.querySelector('[data-step-status]').textContent=reassure[index];
+   milestones.forEach(function(ms,i){
+    ms.classList.toggle('is-active',i===index);
+    ms.classList.toggle('is-done',i<index);
+    if(i===index)ms.querySelector('.milestone-dot').setAttribute('aria-current','step');
+    else ms.querySelector('.milestone-dot').removeAttribute('aria-current');
+   });
    if(index===2)summary();
    if(focus){var legend=steps[index].querySelector('legend');legend.tabIndex=-1;legend.focus({preventScroll:true});form.closest('.request-shell').scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
   }
