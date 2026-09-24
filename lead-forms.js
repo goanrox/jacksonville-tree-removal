@@ -111,11 +111,26 @@
       }
       if (!leadId.value) leadId.value = 'JTR-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
 
-      [['source_url', window.location.href], ['referrer', document.referrer], ['submitted_at', new Date().toISOString()]].forEach(function (item) {
-        var field = form.querySelector('input[name="' + item[0] + '"]');
-        if (!field) { field = document.createElement('input'); field.type = 'hidden'; field.name = item[0]; form.appendChild(field); }
-        field.value = item[1];
-      });
+      function setHidden(name, value) {
+        var field = form.querySelector('input[name="' + name + '"]');
+        if (!field) { field = document.createElement('input'); field.type = 'hidden'; field.name = name; form.appendChild(field); }
+        field.value = value;
+      }
+
+      // Attribution groundwork: prove where each lead came from. source_url +
+      // referrer + any UTM tags ride through /api/submit-lead into the lead
+      // email, so leads are provable to providers later.
+      setHidden('source_url', window.location.href);
+      setHidden('page_title', document.title || '');
+      setHidden('referrer', document.referrer || '');
+      setHidden('submitted_at', new Date().toISOString());
+      try {
+        var qs = new URLSearchParams(window.location.search);
+        ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(function (k) {
+          var v = qs.get(k);
+          if (v) setHidden(k, v);
+        });
+      } catch (_) {}
 
       var payload = {};
       Array.from(new FormData(form).entries()).forEach(function (entry) {

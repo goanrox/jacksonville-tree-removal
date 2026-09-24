@@ -10,6 +10,62 @@
 const https = require('https');
 const dns = require('dns').promises;
 
+// ---------------------------------------------------------------------------
+// Revenue-loop upgrade (Sep 2026)
+// 1. Homeowner auto-reply via Web3Forms' built-in "autoresponse" field (free):
+//    the homeowner gets an instant confirmation email for every lead. Set here
+//    for the JS path; the no-JS path carries the same text as a hidden input
+//    in each form. Keep the two copies in sync.
+// 2. Instant owner push via ntfy.sh (free HTTP push): after the lead is
+//    accepted, a notification fires to a private ntfy topic. The owner
+//    installs the free ntfy app and subscribes — see SETUP-NOTES.md. The
+//    topic token is unguessable; it is not a secret, it just keeps the
+//    channel quiet. pushLeadAlert NEVER throws — a failed push must never
+//    cost a lead.
+// 3. Lead attribution groundwork: every lead carries page/referrer/UTM
+//    details through to the inbox email, so leads are provable to providers
+//    later. A true call-tracking number needs paid telephony (Twilio ~$1/mo
+//    + usage) — documented as a costed next step in SETUP-NOTES.md, not
+//    bought here.
+// ---------------------------------------------------------------------------
+const AUTO_REPLY = [
+  'Thanks for reaching out to Onslow Tree Removal — we got your request.',
+  '',
+  'A real person here in Jacksonville reads every request and will call you back, usually the same day, from (910) 601-5667.',
+  '',
+  "If you'd rather talk sooner, just call or text us at (910) 601-5667.",
+  '',
+  'Six-oh-one, five-six, six-seven — Onslow Tree Removal gets it done!',
+  '',
+  '— Your Onslow Tree Removal team'
+].join('\n');
+
+const NTFY_TOPIC = 'jtr-leads-b88e37a35113675ee365668e80061a87';
+
+async function pushLeadAlert(d) {
+  try {
+    const lines = [
+      'Name: ' + (d.name || '(not given)'),
+      'Phone: ' + (d.phone || '(not given)'),
+      'Service: ' + (d.service || '(not given)'),
+      'Where: ' + (d.address || '(not given)'),
+      'Urgency: ' + (d.urgency || '(not given)'),
+      'Email: ' + (d.email || '(not given)'),
+      'Lead ID: ' + (d.lead_id || '(none)'),
+      'Page: ' + (d.source_url || d.page_url || '(unknown)')
+    ];
+    await withTimeout(httpsJson('POST', 'https://ntfy.sh', {
+      topic: NTFY_TOPIC,
+      title: 'New tree request',
+      priority: 4,
+      tags: ['tree'],
+      message: lines.join('\n')
+    }), 8000, 'ntfy');
+  } catch (e) {
+    // Swallowed on purpose: push is a nicety, the lead is the asset.
+  }
+}
+
 function withTimeout(promise, ms, label) {
   let timer;
   const timeout = new Promise((_, reject) => {
@@ -210,6 +266,7 @@ module.exports = async (req, res) => {
     subject: (d.subject || 'New Lead — Onslow Tree Removal') +
       (photoError ? ' — ⚠️ PHOTO MISSING, VERIFY BY PHONE' : ''),
     from_name: d.from_name || 'Onslow Tree Removal website',
+    autoresponse: AUTO_REPLY, // instant homeowner confirmation (Web3Forms sends it free)
     name: d.name || '',
     phone: String(d.phone),
     email,
@@ -220,8 +277,15 @@ module.exports = async (req, res) => {
     photo_url: photoUrl,
     photo_status: photoUrl ? 'uploaded: ' + photoUrl : photoError,
     lead_id: d.lead_id || '',
+    // Attribution groundwork: proves where each lead came from (for providers).
     source_url: d.source_url || '',
+    page_title: d.page_title || '',
     referrer: d.referrer || '',
+    utm_source: d.utm_source || '',
+    utm_medium: d.utm_medium || '',
+    utm_campaign: d.utm_campaign || '',
+    utm_term: d.utm_term || '',
+    utm_content: d.utm_content || '',
     submitted_at: d.submitted_at || new Date().toISOString(),
     botcheck: d.botcheck || ''
   };
@@ -233,6 +297,9 @@ module.exports = async (req, res) => {
     res.status(502).end(JSON.stringify({ success: false }));
     return;
   }
+
+  // Fire-and-forget owner push; never blocks or fails the lead.
+  pushLeadAlert(Object.assign({}, d, { email })).catch(function () {});
 
   res.status(200).end(JSON.stringify({ success: true }));
 };
