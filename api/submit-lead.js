@@ -12,10 +12,11 @@ const dns = require('dns').promises;
 
 // ---------------------------------------------------------------------------
 // Revenue-loop upgrade (Sep 2026)
-// 1. Homeowner auto-reply via Web3Forms' built-in "autoresponse" field (free):
-//    the homeowner gets an instant confirmation email for every lead. Set here
-//    for the JS path; the no-JS path carries the same text as a hidden input
-//    in each form. Keep the two copies in sync.
+// 1. Homeowner auto-reply: handled by the "Onslow Lead Auto-Reply" Apps Script
+//    (every-minute trigger on the business Gmail), NOT by Web3Forms. The
+//    Web3Forms "autoresponse" field was removed Sep 26, 2026 so homeowners
+//    get exactly one confirmation email — the personalized Apps Script one.
+//    Do not re-add an autoresponse field here or as a hidden form input.
 // 2. Instant owner push via ntfy.sh (free HTTP push): after the lead is
 //    accepted, a notification fires to a private ntfy topic. The owner
 //    installs the free ntfy app and subscribes — see SETUP-NOTES.md. The
@@ -28,18 +29,6 @@ const dns = require('dns').promises;
 //    + usage) — documented as a costed next step in SETUP-NOTES.md, not
 //    bought here.
 // ---------------------------------------------------------------------------
-const AUTO_REPLY = [
-  'Thanks for reaching out to Onslow Tree Removal — we got your request.',
-  '',
-  'A real person here in Jacksonville reads every request and will call you back, usually the same day, from (910) 601-5667.',
-  '',
-  "If you'd rather talk sooner, just call or text us at (910) 601-5667.",
-  '',
-  'Six-oh-one, five-six, six-seven — Onslow Tree Removal gets it done!',
-  '',
-  '— Your Onslow Tree Removal team'
-].join('\n');
-
 const NTFY_TOPIC = 'jtr-leads-b88e37a35113675ee365668e80061a87';
 
 async function pushLeadAlert(d) {
@@ -266,7 +255,7 @@ module.exports = async (req, res) => {
     subject: (d.subject || 'New Lead — Onslow Tree Removal') +
       (photoError ? ' — ⚠️ PHOTO MISSING, VERIFY BY PHONE' : ''),
     from_name: d.from_name || 'Onslow Tree Removal website',
-    autoresponse: AUTO_REPLY, // instant homeowner confirmation (Web3Forms sends it free)
+    // NOTE: no "autoresponse" field — the Apps Script sends the one confirmation email.
     name: d.name || '',
     phone: String(d.phone),
     email,
