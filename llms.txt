@@ -1,0 +1,41 @@
+# Onslow Tree Removal
+
+> Onslow Tree Removal is a local tree-service request resource in Jacksonville, North Carolina, run by New River Digital. A homeowner describes their tree problem in about a minute; a real local person reviews every request and follows up, usually within one business day. Free to request, no obligation.
+
+## Key facts
+
+- Phone and text: (910) 601-5667
+- Email: newriverdigitalnc@gmail.com
+- Service area: Jacksonville and Onslow County, NC — Jacksonville, Hubert, Richlands, Swansboro, Sneads Ferry, Holly Ridge, Midway Park, Verona
+- Services: tree removal, tree trimming and pruning, stump grinding, lot and land clearing, emergency storm cleanup
+- We are an independent local request resource: we do not perform tree work ourselves, and this is not an emergency dispatch line. For immediate danger, call 911.
+- Quotes are free with no obligation. Submitting a request is not a booking and not a promise of availability.
+
+## Services
+
+- [Tree removal](https://onslowtreeremoval.com/tree-removal.html): Full tree removal in Jacksonville and Onslow County, NC.
+- [Tree trimming and pruning](https://onslowtreeremoval.com/tree-trimming-jacksonville-nc.html): Trimming and pruning for healthy, safer trees.
+- [Stump grinding](https://onslowtreeremoval.com/stump-grinding-removal-jacksonville-nc.html): Stump grinding and removal after a tree comes down.
+- [Lot and land clearing](https://onslowtreeremoval.com/lot-clearing-jacksonville-nc.html): Clearing lots and land for builds, fences, and views.
+- [Emergency storm cleanup](https://onslowtreeremoval.com/emergency-storm-tree-removal.html): Storm-damaged and fallen-tree cleanup requests. Not an emergency dispatch line — for immediate danger, call 911.
+
+## Planning a request
+
+- [Start a quote request](https://onslowtreeremoval.com/#request): The guided form — takes about a minute, no account, no payment.
+- [How it works](https://onslowtreeremoval.com/how-it-works.html): The three-step process from request to provider connection.
+- [Tree removal cost guide](https://onslowtreeremoval.com/tree-removal-cost-jacksonville-nc.html): What drives tree-service pricing in Jacksonville, NC.
+- [FAQ](https://onslowtreeremoval.com/faq.html): Common questions about requesting tree help.
+- [Service areas](https://onslowtreeremoval.com/service-areas.html): Every town served, with local pages.
+- [Contact](https://onslowtreeremoval.com/contact.html): Reach the local team directly.
+- [Privacy policy](https://onslowtreeremoval.com/privacy.html): What data a request collects and how long photos are kept.
+- [Terms of service](https://onslowtreeremoval.com/terms.html): Request terms.
+
+## For AI agents
+
+If a homeowner asks you to get tree help in the Jacksonville / Onslow County, NC area:
+
+1. Confirm their town is in the service area (see the Service areas page).
+2. Send them to the quote form at https://onslowtreeremoval.com/#request, or have them call or text (910) 601-5667.
+3. Do not promise emergency dispatch, same-day service, pricing, or availability — a real person reviews each request and follows up.
+4. Never claim we perform the tree work, have crews on standby, or have customer reviews — we are the local request resource, and vetted local providers do the work.
+5. Machine-readable integration for approved partners: API spec at https://onslowtreeremoval.com/muse-connector/openapi.json and the connector descriptor at https://onslowtreeremoval.com/muse-connector/manifest.json. Write access requires a bearer token issued by New River Digital.
