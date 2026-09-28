@@ -1,0 +1,39 @@
+{
+  "name": "Onslow Tree Removal",
+  "description": "Tree-service quote intake for homeowners in Jacksonville and Onslow County, North Carolina. Discovery card for AI agents: read-only service and service-area lookups are public at the URLs below; submitting a quote request requires an approved-partner bearer token. Homeowners without a token should use the web form at https://onslowtreeremoval.com/#request or call/text (910) 601-5667. Programmatic access is REST (see each skill); this card is for discovery.",
+  "url": "https://onslowtreeremoval.com",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "skills": [
+    {
+      "id": "list-services",
+      "name": "List tree services",
+      "description": "Returns the tree services offered (removal, trimming and pruning, stump grinding, lot and land clearing, emergency storm cleanup) with business contact info. Read-only, no authentication. GET https://onslowtreeremoval.com/api/connector/v1/services",
+      "inputModes": ["text/plain", "application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "check-service-area",
+      "name": "Check service area",
+      "description": "Confirms whether a homeowner's town is served (Jacksonville and Onslow County, NC: Jacksonville, Hubert, Richlands, Swansboro, Sneads Ferry, Holly Ridge, Midway Park, Verona). Read-only, no authentication. GET https://onslowtreeremoval.com/api/connector/v1/service-area",
+      "inputModes": ["text/plain", "application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "submit-quote-request",
+      "name": "Submit a tree-service quote request",
+      "description": "Submits a structured quote request (contact name, 10-digit US phone, email, address, service_id, urgency, details, optional photo). The only side effect is one lead email to the business inbox; a local reviewer follows up, usually within one business day. Requires an approved-partner bearer token as Authorization: Bearer <token>. Send dry_run:true to validate without creating a lead. POST https://onslowtreeremoval.com/api/connector/v1/quote-requests. Full schema: https://onslowtreeremoval.com/muse-connector/openapi.json",
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ],
+  "authentication": {
+    "schemes": ["bearer"]
+  },
+  "defaultInputModes": ["text/plain", "application/json"],
+  "defaultOutputModes": ["application/json", "text/plain"]
+}
