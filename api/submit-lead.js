@@ -228,14 +228,16 @@ module.exports = async (req, res) => {
   }
 
 
-  // Photo is required from the homeowner, but a failed upload must NEVER lose
-  // the lead. On failure we flag it loudly so it gets phone-verified instead.
+  // Photo is optional — Fo phone-verifies every lead. A failed upload of a
+  // provided photo must NEVER lose the lead: flag it loudly instead.
   let photoUrl = '', photoError = '';
+  const photoProvided = !!d.photoBase64;
   try {
-    if (!d.photoBase64) throw new Error('photo required');
-    const buf = Buffer.from(d.photoBase64, 'base64');
-    if (!buf.length || buf.length > 5 * 1024 * 1024) throw new Error('bad photo size');
-    photoUrl = (await hostPhoto(buf)).url;
+    if (photoProvided) {
+      const buf = Buffer.from(d.photoBase64, 'base64');
+      if (!buf.length || buf.length > 5 * 1024 * 1024) throw new Error('bad photo size');
+      photoUrl = (await hostPhoto(buf)).url;
+    }
   } catch (e) {
     photoError = 'PHOTO UPLOAD FAILED (' +
       ((e && e.attempts && e.attempts.join(' | ')) || (e && e.message) || 'unknown') +
@@ -264,7 +266,7 @@ module.exports = async (req, res) => {
     urgency: String(d.urgency),
     service: String(d.service),
     photo_url: photoUrl,
-    photo_status: photoUrl ? 'uploaded: ' + photoUrl : photoError,
+    photo_status: photoUrl ? 'uploaded: ' + photoUrl : (photoError || 'not provided (optional)'),
     lead_id: d.lead_id || '',
     // Attribution groundwork: proves where each lead came from (for providers).
     source_url: d.source_url || '',

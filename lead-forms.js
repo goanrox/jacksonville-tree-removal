@@ -150,9 +150,8 @@
       var timeout = controller ? window.setTimeout(function () { controller.abort(); }, TIMEOUT_MS) : null;
 
       photoPromise.then(function (pr) {
-        if (!pr.ok || !pr.photo) { fail(PHOTO_MSG); return null; }
-        payload.photoBase64 = pr.photo.base64;
-        payload.photoName = pr.photo.name;
+        if (!pr.ok) { fail(PHOTO_MSG); return null; } // a chosen photo that could not be read
+        if (pr.photo) { payload.photoBase64 = pr.photo.base64; payload.photoName = pr.photo.name; }
         return fetch('/api/submit-lead', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
